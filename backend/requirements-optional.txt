@@ -1,0 +1,11 @@
+# Optional extras. The application runs fully without these.
+#
+# python-nmap enables the Nmap engine, which gives richer service/version
+# detection than the built-in socket engine. It also requires system Nmap
+# to be installed and on PATH (https://nmap.org/download).
+#
+#   pip install -r requirements-optional.txt
+#
+# Without it, build_scanner() silently falls back to the socket engine.
+
+python-nmap>=0.7.1

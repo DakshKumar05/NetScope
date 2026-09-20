@@ -1,0 +1,75 @@
+# Local demo environment.
+#
+#   docker compose up --build
+#
+# Brings up the API, the web UI, and two ordinary target services on an
+# isolated bridge network so you have something safe to point the scanner at.
+#
+# The demo targets are stock images in their default configuration. Nothing
+# here is deliberately vulnerable - the point is to exercise discovery and
+# fingerprinting, not to host an exploitable service on your machine.
+
+services:
+  api:
+    build:
+      context: ./backend
+    container_name: nes-api
+    ports:
+      - '8000:8000'
+    environment:
+      NES_DATABASE_URL: sqlite:////data/network_scanner.db
+      NES_ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173
+      # The demo targets sit on a private bridge network, so the default
+      # private-only guard already permits them.
+      NES_ALLOW_PUBLIC_TARGETS: 'false'
+      # Optional: raises the NVD rate limit. Get a free key from NIST.
+      NES_NVD_API_KEY: ${NES_NVD_API_KEY:-}
+    volumes:
+      - api-data:/data
+    networks:
+      - scanner-net
+    healthcheck:
+      test: ['CMD', 'python', '-c', "import urllib.request;urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE: http://localhost:8000
+    container_name: nes-web
+    ports:
+      - '5173:80'
+    depends_on:
+      - api
+    networks:
+      - scanner-net
+
+  # ---------------------------------------------------------------- targets
+  # Two well-behaved services to scan. Reachable only from this network.
+
+  demo-web:
+    image: nginx:1.27-alpine
+    container_name: nes-demo-web
+    networks:
+      - scanner-net
+    # Not published to the host: scan it from the API container by name or by
+    # its address on scanner-net.
+
+  demo-redis:
+    image: redis:7-alpine
+    container_name: nes-demo-redis
+    networks:
+      - scanner-net
+
+networks:
+  scanner-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
+
+volumes:
+  api-data:

@@ -1,0 +1,173 @@
+@import 'tailwindcss';
+
+/*
+  Design tokens.
+
+  Severity uses the reserved status palette and is never carried by colour
+  alone - every severity mark ships beside its text label. The red/amber/yellow
+  trio cannot clear the adjacent-pair legibility floor when stacked as a
+  colour-only series, so severity-over-time is faceted into single-series
+  panels rather than stacked. Trends are single-series and use the sequential
+  accent hue.
+*/
+
+@theme {
+  --color-plane: #0a0a0b;
+  --color-surface: #141416;
+  --color-raised: #1a1a1d;
+  --color-overlay: #1f1f23;
+
+  --color-ink: #f4f4f5;
+  --color-ink-secondary: #a1a1aa;
+  --color-ink-muted: #71717a;
+
+  --color-line: #232326;
+  --color-line-strong: #2f2f34;
+
+  --color-accent: #3987e5;
+  --color-accent-soft: #1c5cab;
+  --color-accent-dim: #184f95;
+
+  --color-critical: #d03b3b;
+  --color-high: #ec835a;
+  --color-medium: #fab219;
+  --color-low: #3987e5;
+  --color-info: #898781;
+  --color-good: #0ca30c;
+
+  --font-mono: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', 'Cascadia Mono',
+    Menlo, Consolas, monospace;
+  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-plane);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Light mode is a deliberate second selection, not an inversion. */
+html.light {
+  color-scheme: light;
+}
+
+html.light body {
+  background: #f4f4f2;
+  color: #0b0b0b;
+}
+
+html.light {
+  --color-plane: #f4f4f2;
+  --color-surface: #fcfcfb;
+  --color-raised: #ffffff;
+  --color-overlay: #ffffff;
+  --color-ink: #0b0b0b;
+  --color-ink-secondary: #52514e;
+  --color-ink-muted: #898781;
+  --color-line: #e1e0d9;
+  --color-line-strong: #c3c2b7;
+  --color-accent: #2a78d6;
+}
+
+@layer utilities {
+  .glass {
+    background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+    backdrop-filter: blur(12px);
+  }
+
+  .hairline {
+    border: 1px solid var(--color-line);
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Scrollbars: present but recessive. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--color-line-strong);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-raised);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-ink) 6%, transparent),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Recharts overrides so chart chrome stays recessive. */
+.recharts-cartesian-grid line {
+  stroke: var(--color-line);
+}
+
+.recharts-cartesian-axis-line,
+.recharts-cartesian-axis-tick-line {
+  stroke: var(--color-line-strong);
+}
+
+.recharts-text {
+  fill: var(--color-ink-muted);
+  font-size: 11px;
+}
+
+.recharts-surface:focus {
+  outline: none;
+}

@@ -1,0 +1,18 @@
+# Floor constraints rather than exact pins: this project targets Python 3.13+
+# and several of these ship compiled wheels that must match the interpreter.
+# Pinning exact older versions forces a source build on newer Pythons.
+
+fastapi>=0.118
+uvicorn[standard]>=0.37
+pydantic>=2.12
+pydantic-settings>=2.11
+SQLAlchemy>=2.0.44
+httpx>=0.28
+cryptography>=46.0
+
+# The Nmap engine is optional - see requirements-optional.txt.
+# The socket engine is the default and needs nothing beyond the stdlib.
+
+# Testing
+pytest>=8.4
+pytest-asyncio>=1.2
